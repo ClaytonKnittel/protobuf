@@ -23,6 +23,7 @@
 #include "google/protobuf/arena.h"
 #include "google/protobuf/repeated_field.h"
 #include "google/protobuf/repeated_ptr_field.h"
+#include "google/protobuf/test_protos/repeated_field_proxy_import_message.pb.h"
 #include "google/protobuf/test_protos/repeated_field_proxy_test.pb.h"
 #include "google/protobuf/test_textproto.h"
 
@@ -33,6 +34,8 @@ namespace internal {
 namespace {
 
 using ::proto2_unittest::RepeatedFieldProxyTestSimpleMessage;
+using ::proto2_unittest::TestRepeatedImportMessageProxy;
+using ::proto2_unittest::TestRepeatedMessageProxy;
 using ::testing::AnyOf;
 using ::testing::ElementsAre;
 using ::testing::Ge;
@@ -349,6 +352,19 @@ using AllStringProxyTestParams = ::testing::Types<TEST_STRING_USE_ARENA()>;
 
 TYPED_TEST_SUITE(RepeatedStringFieldProxyTest, AllStringProxyTestParams,
                  RepeatedStringFieldProxyTestName);
+
+TYPED_TEST(RepeatedNumericFieldProxyTest, Offsets) {
+  auto field = this->MakeRepeatedFieldContainer();
+  auto proxy = field.MakeProxy();
+  auto const_proxy = field.MakeConstProxy();
+
+  EXPECT_EQ(sizeof(proxy), 2 * sizeof(void*));
+  EXPECT_EQ(sizeof(const_proxy), sizeof(void*));
+  EXPECT_EQ(proxy.base_offset(), 0);
+  EXPECT_EQ(proxy.field_offset(), 0);
+  EXPECT_EQ(proxy.arena_offset(), sizeof(void*));
+  EXPECT_EQ(const_proxy.field_offset(), 0);
+}
 
 TYPED_TEST(RepeatedNumericFieldProxyTest, RepeatedNumeric) {
   auto field = this->MakeRepeatedFieldContainer();
@@ -2278,6 +2294,58 @@ INSTANTIATE_TEST_SUITE_P(RepeatedFieldProxyTest, RepeatedFieldProxyTest,
                          [](const testing::TestParamInfo<bool>& info) {
                            return info.param ? "WithArena" : "WithoutArena";
                          });
+
+// Verify the return types of all accessors for legacy and proxy repeated
+// fields:
+
+// Repeated messages:
+static_assert(
+    std::is_same_v<
+        decltype(std::declval<TestRepeatedMessageProxy>().nested_messages()),
+        const RepeatedPtrField<TestRepeatedMessageProxy::NestedMessage>&>);
+static_assert(
+    std::is_same_v<decltype(std::declval<TestRepeatedMessageProxy>()
+                                .mutable_nested_messages()),
+                   RepeatedPtrField<TestRepeatedMessageProxy::NestedMessage>*>);
+static_assert(
+    std::is_same_v<
+        decltype(std::declval<TestRepeatedMessageProxy>()
+                     .nested_messages_proxy()),
+        RepeatedFieldProxy<const TestRepeatedMessageProxy::NestedMessage>>);
+static_assert(std::is_same_v<
+              decltype(std::declval<TestRepeatedMessageProxy>()
+                           .mutable_nested_messages_proxy()),
+              RepeatedFieldProxy<TestRepeatedMessageProxy::NestedMessage>>);
+
+TEST(RepeatedFieldProxyInterfaceTest, RepeatedMessageProxy) {
+  TestRepeatedMessageProxy msg;
+  {
+    auto proxy = msg.mutable_nested_messages_proxy();
+    proxy.emplace_back().set_value(1);
+    proxy.emplace_back().set_value(2);
+    proxy.emplace_back().set_value(3);
+  }
+
+  auto proxy = msg.nested_messages_proxy();
+  EXPECT_THAT(proxy, ElementsAre(EqualsProto(R"pb(value: 1)pb"),
+                                 EqualsProto(R"pb(value: 2)pb"),
+                                 EqualsProto(R"pb(value: 3)pb")));
+}
+
+TEST(RepeatedFieldProxyInterfaceTest, RepeatedImportMessageProxy) {
+  TestRepeatedImportMessageProxy msg;
+  {
+    auto proxy = msg.mutable_import_messages_proxy();
+    proxy.emplace_back().set_value(1);
+    proxy.emplace_back().set_value(2);
+    proxy.emplace_back().set_value(3);
+  }
+
+  auto proxy = msg.import_messages_proxy();
+  EXPECT_THAT(proxy, ElementsAre(EqualsProto(R"pb(value: 1)pb"),
+                                 EqualsProto(R"pb(value: 2)pb"),
+                                 EqualsProto(R"pb(value: 3)pb")));
+}
 
 }  // namespace
 }  // namespace internal
