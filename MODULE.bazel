@@ -8,6 +8,13 @@ module(
     repo_name = "com_google_protobuf",
 )
 
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "57dccc926f649d8ce88da67154f5925b6cd8ad2b",
+    remote = "https://github.com/ClaytonKnittel/bazel-compile-commands-extractor.git",
+)
+
 # LOWER BOUND dependency versions.
 # Bzlmod follows MVS:
 # https://bazel.build/versions/6.0.0/build/bzlmod#version-resolution
