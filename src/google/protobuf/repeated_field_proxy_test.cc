@@ -1,5 +1,8 @@
 #include "google/protobuf/repeated_field_proxy.h"
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -10,8 +13,6 @@
 #include <type_traits>
 #include <utility>
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "absl/algorithm/container.h"
 #include "absl/meta/type_traits.h"
 #include "absl/strings/cord.h"
@@ -23,7 +24,6 @@
 #include "google/protobuf/repeated_ptr_field.h"
 #include "google/protobuf/test_protos/repeated_field_proxy_test.pb.h"
 #include "google/protobuf/test_textproto.h"
-
 
 namespace google {
 namespace protobuf {
@@ -1106,9 +1106,9 @@ TEST_P(RepeatedFieldProxyTest, StringViewIteratorsElementAccess) {
   EXPECT_TRUE(it == proxy.end());
 
   google::protobuf::sort(proxy.begin(), proxy.end(),
-               [](absl::string_view a, absl::string_view b) {
-                 return a.size() < b.size();
-               });
+                         [](absl::string_view a, absl::string_view b) {
+                           return a.size() < b.size();
+                         });
   EXPECT_THAT(proxy, ElementsAre("3rd", "first", "second"));
 }
 
