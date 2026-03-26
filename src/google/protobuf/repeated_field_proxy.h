@@ -13,7 +13,6 @@
 #include "google/protobuf/repeated_field.h"
 #include "google/protobuf/repeated_ptr_field.h"
 
-
 // Must be included last.
 #include "google/protobuf/port_def.inc"
 
@@ -202,8 +201,8 @@ class RepeatedFieldProxyBase {
 
   // Note that the iterator types are all exposed via the iterator methods (e.g.
   // `begin()`). Both `RepeatedField::iterator` and `RepeatedPtrField::iterator`
-  // are in the google::protobuf::internal namespace, meaning users are forbidden from
-  // actually spelling them.
+  // are in the google::protobuf::internal namespace, meaning users are
+  // forbidden from actually spelling them.
   //
   // This is important, as the concrete type of the iterator leaks the
   // underlying container type. With a forbidden spelling, we have the
@@ -717,10 +716,10 @@ namespace internal {
 // passed around by value and inlined away to oblivion. Regardless, size
 // assertions guarantee that the compiler hasn't introduced invisible members
 // that we didn't notice (e.g. `PROTOBUF_DECLSPEC_EMPTY_BASES`).
-// static_assert(sizeof(RepeatedFieldProxy<int>) == 2 * sizeof(void*),
-//               "Mutable `RepeatedFieldProxy` is not the expected size");
-// static_assert(sizeof(RepeatedFieldProxy<const int>) == sizeof(void*),
-//               "Const `RepeatedFieldProxy` is not the expected size");
+static_assert(sizeof(RepeatedFieldProxy<int>) == 2 * sizeof(void*),
+              "Mutable `RepeatedFieldProxy` is not the expected size");
+static_assert(sizeof(RepeatedFieldProxy<const int>) == sizeof(void*),
+              "Const `RepeatedFieldProxy` is not the expected size");
 
 // A helper function to construct a `RepeatedFieldProxy`. This is more scalable
 // than friending all places that need to construct `RepeatedFieldProxy`.

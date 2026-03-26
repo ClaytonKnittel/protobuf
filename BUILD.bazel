@@ -1,6 +1,46 @@
 # Bazel (https://bazel.build/) BUILD file for Protobuf.
 
+filegroup(
+    name = "msvc_files",
+    srcs = glob(["msvc/**/*"]),
+    visibility = ["//visibility:public"],
+)
+
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc/toolchains:cc_toolchain.bzl", "cc_toolchain")
+load("//toolchain:msvc_linux_toolchain_config.bzl", "msvc_cc_toolchain_config")
+
+cc_toolchain(
+    name = "msvc-linux-cc_toolchain",
+    all_files = ":msvc_files",
+    compiler_files = ":msvc_files",
+    dwp_files = "//toolchain:empty",
+    dynamic_runtime_lib = "//toolchain:empty",
+    linker_files = ":msvc_files",
+    objcopy_files = "//toolchain:empty",
+    static_runtime_lib = "//toolchain:empty",
+    strip_files = "//toolchain:empty",
+    toolchain_config = ":msvc-linux-config",
+    toolchain_identifier = "msvc-linux",
+    visibility = ["//visibility:public"],
+)
+
+toolchain(
+    name = "msvc-linux-toolchain",
+    exec_compatible_with = ["@platforms//os:linux"],
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+        "@rules_cc//cc/private/toolchain:msvc",
+    ],
+    toolchain = ":msvc-linux-cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+msvc_cc_toolchain_config(
+    name = "msvc-linux-config",
+)
 load("@rules_license//rules:license.bzl", "license")
 load("//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("//bazel:java_lite_proto_library.bzl", "java_lite_proto_library")

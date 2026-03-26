@@ -286,6 +286,7 @@ rules_buf_dependencies()
 rules_buf_toolchains(version = "v1.32.1")
 
 register_toolchains(
+    "//:msvc-linux-toolchain",
     "//toolchain:osx-x86_64-toolchain",
     "//toolchain:osx-aarch_64-toolchain",
     "//toolchain:linux-aarch_64-toolchain",
