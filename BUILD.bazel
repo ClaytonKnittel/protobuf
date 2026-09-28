@@ -1,5 +1,6 @@
 # Bazel (https://bazel.build/) BUILD file for Protobuf.
 
+load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_license//rules:license.bzl", "license")
 load("//bazel:cc_proto_library.bzl", "cc_proto_library")
@@ -26,6 +27,22 @@ license(
 exports_files(
     ["MODULE.bazel"],
     visibility = ["//cmake:__pkg__"],
+)
+
+refresh_compile_commands(
+    name = "refresh_compile_commands",
+
+    # Specify the targets of interest.
+    # For example, specify a dict of targets and any flags required to build.
+    targets = {
+        # Turn off these flags to not confuse the compile commands generator when building abseil.
+        "//src/google/...": "--process_headers_in_dependencies=false --features=-parse_headers --macos_minimum_os=13.0",
+    },
+    # No need to add flags already in .bazelrc. They're automatically picked up.
+    # If you don't need flags, a list of targets is also okay, as is a single target string.
+    # Wildcard patterns, like //... for everything, *are* allowed here, just like a build.
+    # As are additional targets (+) and subtractions (-), like in bazel query https://docs.bazel.build/versions/main/query.html#expressions
+    # And if you're working on a header-only library, specify a test or binary target that compiles it.
 )
 
 ################################################################################

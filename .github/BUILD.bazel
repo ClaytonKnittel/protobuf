@@ -20,6 +20,15 @@ sh_test(
     deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
+xcode_version(
+    name = "version16_4_16F6",
+    version = "16.4",
+    aliases = [
+        "16.4.0",
+        "16.4.0.16F6",
+    ],
+)
+
 # This information is extracted from the MacOS runner specs located at:
 # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
 #
@@ -80,8 +89,9 @@ xcode_version(
 
 xcode_config(
     name = "host_xcodes",
-    default = ":version15_2_15C500b",
+    default = ":version16_4_16F6",
     versions = [
+        ":version16_4_16F6",
         ":version15_2_15C500b",
         ":version14_2_14C18",
         ":version14_1_0_14B47b",
